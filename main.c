@@ -12,10 +12,10 @@ struct MemoryStruct
 void *printResult(char *result)
 {
 
-    // printf("%s\n", result);
+    printf("%s\n", result);
 
     int length = strlen(result);
-    const int DELAY = 50;
+    const int DELAY = 10;
     int *dp = calloc(length, sizeof(int));
 
     int a = length, b = 0;
@@ -33,10 +33,10 @@ void *printResult(char *result)
 
         if (print)
         {
-            if (result[i] == '\\' && i + 1 < length && result[i + 1] == 'n')
+            if (result[i] == '&')
             {
                 putchar('\n');
-                i++; // 跳过紧跟的 'n'
+                
                 Sleep(DELAY);
             }
             else
@@ -45,7 +45,6 @@ void *printResult(char *result)
                 Sleep(DELAY);
             }
         }
-        
 
         if (dp[i] == strlen(STR_CMP))
             print = 1;
@@ -76,8 +75,8 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 
 int main(int argc, char *argv[])
 {
-    char *inputstr = "Hello Deepseek";
-    char *prompt = "(Please only output (English letters, space, \\n) no any other character allowed!)";
+    char *inputstr = "Hello DeepSeek";
+    char *prompt = "(1.Only use Chinese Englsh space ? and & character) 2. Answer in Chinese language 3. & character for newline character)";
     // parse args
     if (argc > 1)
         inputstr = argv[1];
