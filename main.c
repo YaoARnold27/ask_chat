@@ -37,13 +37,15 @@ void *printResult(char *result)
             {
                 putchar('\n');
                 i++; // 跳过紧跟的 'n'
+                Sleep(DELAY);
             }
             else
             {
                 putchar(result[i]);
+                Sleep(DELAY);
             }
         }
-        Sleep(DELAY);
+        
 
         if (dp[i] == strlen(STR_CMP))
             print = 1;
@@ -75,7 +77,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 int main(int argc, char *argv[])
 {
     char *inputstr = "Hello Deepseek";
-    char *prompt = "(Please only output [Chinese symbol, English letters, space, \\n] no any other character allowed!)";
+    char *prompt = "(Please only output (English letters, space, \\n) no any other character allowed!)";
     // parse args
     if (argc > 1)
         inputstr = argv[1];
