@@ -176,7 +176,24 @@ int main(void)
     {
         struct curl_slist *headers = NULL;
         headers = curl_slist_append(headers, "Content-Type: application/json");
-        headers = curl_slist_append(headers, "x-api-key: sk-e1ec9795711d454a9f8671c4cb06cee4");
+
+        // Switch to reading API-KEY
+        const char *api_key = getenv("DEEPSEEK_API_KEY");
+        if (!api_key)
+        {
+            fprintf(stderr, "Error: 请先设置环境变量 DEEPSEEK_API_KEY\n");
+            // 清理已分配的内存后退出
+            free(chunk.memory);
+            free(datas);
+            free(inputstr);
+            curl_global_cleanup();
+            return -1;
+        }
+
+        char auth_header[256];
+        snprintf(auth_header, sizeof(auth_header), "x-api-key: %s", api_key);
+        headers = curl_slist_append(headers, auth_header);
+
         headers = curl_slist_append(headers, "anthropic-version: 2023-06-01");
 
         curl_easy_setopt(curl, CURLOPT_URL, "https://api.deepseek.com/anthropic/v1/messages");
