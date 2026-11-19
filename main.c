@@ -131,6 +131,46 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
     return realsize;
 }
 
+/* 从 .exe 同目录的 deepseekapi.txt 读取 API Key */
+int load_api_key(char *key_buf, size_t buf_size)
+{
+    char path[MAX_PATH];
+    DWORD len = GetModuleFileNameA(NULL, path, MAX_PATH);
+    if (len == 0 || len >= MAX_PATH)
+        return 0;
+
+    // 截取最后一个反斜杠前的目录路径，拼接文件名
+    char *last_slash = strrchr(path, '\\');
+    if (last_slash)
+        *(last_slash + 1) = '\0';
+    else
+        path[0] = '\0';
+
+    if (strlen(path) + strlen("deepseekapi.txt") + 1 > MAX_PATH)
+        return 0;
+    strcat(path, "deepseekapi.txt");
+
+    FILE *fp = fopen(path, "r");
+    if (!fp)
+        return 0;
+
+    if (!fgets(key_buf, (int)buf_size, fp))
+    {
+        fclose(fp);
+        return 0;
+    }
+    fclose(fp);
+
+    // 去除末尾可能存在的换行符或空格
+    size_t klen = strlen(key_buf);
+    while (klen > 0 && (key_buf[klen - 1] == '\n' || key_buf[klen - 1] == '\r' || key_buf[klen - 1] == ' '))
+    {
+        key_buf[--klen] = '\0';
+    }
+
+    return klen > 0;
+}
+
 int main(void)
 {
     SetConsoleOutputCP(CP_UTF8);
@@ -174,21 +214,26 @@ int main(void)
 
     if (curl)
     {
-        struct curl_slist *headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-
-        // Switch to reading API-KEY
-        const char *api_key = getenv("DEEPSEEK_API_KEY");
-        if (!api_key)
+        char api_key[128] = {0};
+        if (!load_api_key(api_key, sizeof(api_key)))
         {
-            fprintf(stderr, "Error: 请先设置环境变量 DEEPSEEK_API_KEY\n");
-            // 清理已分配的内存后退出
+            fprintf(stderr, "错误: 无法从程序同目录的 deepseekapi.txt 读取 API Key\n");
+            curl_easy_cleanup(curl);
             free(chunk.memory);
             free(datas);
             free(inputstr);
             curl_global_cleanup();
             return -1;
         }
+
+
+
+
+
+        
+
+        struct curl_slist *headers = NULL;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
 
         char auth_header[256];
         snprintf(auth_header, sizeof(auth_header), "x-api-key: %s", api_key);
