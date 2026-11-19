@@ -32,8 +32,18 @@ void *printResult(char *result)
             dp[i] = dp[i - 1] + 1;
 
         if (print)
-            printf("%c", result[i]);
-        // Sleep(DELAY);
+        {
+            if (result[i] == '\\' && i + 1 < length && result[i + 1] == 'n')
+            {
+                putchar('\n');
+                i++; // 跳过紧跟的 'n'
+            }
+            else
+            {
+                putchar(result[i]);
+            }
+        }
+        Sleep(DELAY);
 
         if (dp[i] == strlen(STR_CMP))
             print = 1;
@@ -65,7 +75,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 int main(int argc, char *argv[])
 {
     char *inputstr = "Hello Deepseek";
-    char *prompt = "(Please only reply in Chinese and in text, no other format allowed!)";
+    char *prompt = "(Please only output [Chinese symbol, English letters, space, \\n] no any other character allowed!)";
     // parse args
     if (argc > 1)
         inputstr = argv[1];
